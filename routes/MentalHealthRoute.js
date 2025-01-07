@@ -5,10 +5,10 @@ const upload = require('../config/Multer')
 const MentalHealthRouter = express.Router();
 
 // Routes
-MentalHealthRouter.post("/action", upload.single("image"), createMentalHealth);
-MentalHealthRouter.get("/action", getAllMentalHealthEntries);
-MentalHealthRouter.get("/action/:id",getMentalHealthById);
-MentalHealthRouter.put("/action/:id", updateMentalHealthById);
-MentalHealthRouter.delete("/action/:id", deleteMentalHealthById);
+MentalHealthRouter.post("/health", upload.single("image"), createMentalHealth);
+MentalHealthRouter.get("/health", getAllMentalHealthEntries);
+MentalHealthRouter.get("/health/:id",getMentalHealthById);
+MentalHealthRouter.put("/health/:id", updateMentalHealthById);
+MentalHealthRouter.delete("/health/:id", deleteMentalHealthById);
 
 module.exports = MentalHealthRouter;
