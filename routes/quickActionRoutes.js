@@ -5,7 +5,7 @@ const upload = require('../config/Multer')
 const router = express.Router();
 
 // Routes
-router.post("/action", upload.single("image"), quickActionController.createQuickAction);
+router.post("/action", quickActionController.createQuickAction);
 router.get("/action", quickActionController.getAllQuickActions);
 router.get("/action/:id", quickActionController.getQuickActionById);
 router.put("/action/:id", quickActionController.updateQuickActionById);

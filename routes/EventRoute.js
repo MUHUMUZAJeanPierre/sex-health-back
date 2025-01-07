@@ -5,7 +5,7 @@ const upload = require('../config/Multer')
 const EventRouter = express.Router();
 
 // Routes
-EventRouter.post("/event", upload.single("image"), createEvent);
+EventRouter.post("/event", createEvent);
 EventRouter.get("/event", getAllEvents);
 EventRouter.get("/event/:id",getEventById);
 EventRouter.put("/event/:id", updateEventById);

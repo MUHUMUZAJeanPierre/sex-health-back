@@ -1,27 +1,69 @@
 const QuickAction = require("../models/QuickAction");
+const cloudinary = require('../Utils/cloudinary');
+const multer = require("multer");
+const fs = require("fs");
+
+// Multer storage setup
+const storage = multer.diskStorage({
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  }
+});
+
+// Init upload
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 3000000 } // 3MB
+}).single("image");
 
 // Create a new QuickAction
 exports.createQuickAction = async (req, res) => {
-  try {
-    const { title, description } = req.body;
-
-    if (!title || !description || !req.file) {
-      return res.status(400).json({ message: "All fields are required." });
+  upload(req, res, async (err) => {
+    if (err) {
+      return res.status(400).json({ message: err.message });
     }
 
-    const newQuickAction = new QuickAction({
-      title,
-      description,
-      image: req.file.path,
-    });
+    try {
+      const { title, description } = req.body;
+      const image = req.file.filename;
 
-    const savedQuickAction = await newQuickAction.save();
-    res.status(201).json({ message: "QuickAction created successfully.", data: savedQuickAction });
-  } catch (error) {
-    console.error("Error creating QuickAction:", error.message);
-    res.status(500).json({ message: "Internal Server Error" });
-  }
+      if (!title || !description || !req.file) {
+        return res.status(400).json({ message: "All fields are required." });
+      }
+
+      // Upload the file to Cloudinary
+      const cloudinaryResult = await cloudinary.uploader.upload(req.file.path);
+
+      // Create a new QuickAction entry
+      const newQuickAction = new QuickAction({
+        title,
+        description,
+        image: cloudinaryResult.secure_url, // Use the Cloudinary URL
+      });
+
+      // Save to the database
+      const savedQuickAction = await newQuickAction.save();
+
+      // Clean up the local file after uploading
+      fs.unlinkSync(req.file.path);
+
+      res.status(201).json({
+        message: "QuickAction created successfully.",
+        data: savedQuickAction
+      });
+    } catch (error) {
+      console.error("Error creating QuickAction:", error.message);
+
+      // Remove the file if an error occurs
+      if (req.file && req.file.path) {
+        fs.unlinkSync(req.file.path);
+      }
+
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  });
 };
+
 
 // Get all QuickActions
 exports.getAllQuickActions = async (req, res) => {
